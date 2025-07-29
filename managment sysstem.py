@@ -45,7 +45,7 @@ def get_patient_details():
     "Batch Number" : int(Batch_No)   #convert to integer after validation
     } 
 def main():
-    "Main function to run the patient managment system"
+    """Main function to run the patient managment system"""
     print("Welcome to the peitent Managment System")
     patient_data = get_patient_details()
 
