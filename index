@@ -1,0 +1,61 @@
+from datetime import datetime
+import os
+
+def main():
+    print("Welcome to the Patient Management System")
+    
+    # Input patient details
+    name = input("Enter patient's name: ")
+    dob = input("Enter patient's date of birth (YYYY-MM-DD): ")
+    mobile_no = input("Enter patient's mobile number: ")
+    batch_no = input("Enter patient's batch number: ")
+
+    # Validate and save patient data
+    result = save_patient_data(name, dob, mobile_no, batch_no)
+    if result:
+        print(result)
+    else:
+        print("Patient data saved successfully.")
+# Ensure the data directory exists
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+def validate_date(date_str):
+    """Validate the date format (YYYY-MM-DD)"""
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+def validate_mobile_number(mobile_str):
+    """Validate the mobile number (should be numeric and of a specific length)."""
+    return mobile_str.isdigit() and len(mobile_str) == 10
+
+def validate_batch_number(batch_str):
+    """Validate that the batch number is numeric"""
+    return batch_str.isdigit()
+
+def save_patient_data(name, dob, mobile_no, batch_no):
+    """Save patient data to a text file."""
+    file_path = f'data/{name.replace(" ", "_")}.txt'
+    with open(file_path, 'w') as f:
+        f.write(f"Name: {name}\n")
+        f.write(f"Date of Birth: {dob}\n")
+        f.write(f"Mobile Number: {mobile_no}\n")
+        f.write(f"Batch Number: {batch_no}\n")
+
+
+        # Validate inputs
+        if not validate_date(dob):
+            return "Invalid date format. Please enter in YYYY-MM-DD format."
+        if not validate_mobile_number(mobile_no):
+            return "Invalid mobile number. Please enter a valid mobile number."
+        if not validate_batch_number(batch_no):
+            return "Invalid batch number. Please enter a numeric value."
+
+        # Save data to a file
+        save_patient_data(name, dob, mobile_no, batch_no)
+
+if __name__ == "__main__":
+    main()
