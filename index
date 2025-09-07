@@ -1,24 +1,46 @@
 from datetime import datetime
 import os
+from openpyxl import Workbook, load_workbook
+
+DATA_FILE = os.path.join("data", "patients.xlsx")
 
 def main():
     print("Welcome to the Patient Management System")
     
     # Input patient details
     name = input("Enter patient's name: ")
-    dob = input("Enter patient's date of birth (YYYY-MM-DD): ")
-    mobile_no = input("Enter patient's mobile number: ")
-    batch_no = input("Enter patient's batch number: ")
+    dob = get_valid_date("Enter patient's date of birth (YYYY-MM-DD): ")
+    mobile_no = get_valid_mobile("Enter patient's mobile number: ")
+    batch_no = get_valid_batch("Enter patient's batch number: ")
 
-    # Validate and save patient data
-    result = save_patient_data(name, dob, mobile_no, batch_no)
-    if result:
-        print(result)
-    else:
-        print("Patient data saved successfully.")
+    # Save data after validation
+    save_patient_data(name, dob, mobile_no, batch_no)
+
 # Ensure the data directory exists
 if not os.path.exists('data'):
     os.makedirs('data')
+
+# -------- Validation Helpers --------
+def get_valid_date(prompt):
+    while True:
+        dob = input(prompt)
+        if validate_date(dob):
+            return dob
+        print("❌ Invalid date format. Please enter in YYYY-MM-DD format.")
+
+def get_valid_mobile(prompt):
+    while True:
+        mobile = input(prompt)
+        if validate_mobile_number(mobile):
+            return mobile
+        print("❌ Invalid mobile number. Enter a valid 10-digit Indian number (starts with 6–9).")
+
+def get_valid_batch(prompt):
+    while True:
+        batch = input(prompt)
+        if validate_batch_number(batch):
+            return batch
+        print("❌ Invalid batch number. Enter numeric value only.")
 
 def validate_date(date_str):
     """Validate the date format (YYYY-MM-DD)"""
@@ -29,33 +51,34 @@ def validate_date(date_str):
         return False
 
 def validate_mobile_number(mobile_str):
-    """Validate the mobile number (should be numeric and of a specific length)."""
-    return mobile_str.isdigit() and len(mobile_str) == 10
+    """Validate Indian mobile number (10 digits, starts with 6–9)."""
+    return mobile_str.isdigit() and len(mobile_str) == 10 and mobile_str[0] in "6789"
 
 def validate_batch_number(batch_str):
     """Validate that the batch number is numeric"""
     return batch_str.isdigit()
 
+# -------- Excel Saving --------
 def save_patient_data(name, dob, mobile_no, batch_no):
-    """Save patient data to a text file."""
-    file_path = f'data/{name.replace(" ", "_")}.txt'
-    with open(file_path, 'w') as f:
-        f.write(f"Name: {name}\n")
-        f.write(f"Date of Birth: {dob}\n")
-        f.write(f"Mobile Number: {mobile_no}\n")
-        f.write(f"Batch Number: {batch_no}\n")
+    """Save patient data to an Excel file."""
+    
+    # If file doesn’t exist, create with headers
+    if not os.path.exists(DATA_FILE):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Patients"
+        ws.append(["Name", "Date of Birth", "Mobile Number", "Batch Number"])
+        wb.save(DATA_FILE)
 
+    # Append new row
+    wb = load_workbook(DATA_FILE)
+    ws = wb.active
+    ws.append([name, dob, mobile_no, batch_no])
+    wb.save(DATA_FILE)
 
-        # Validate inputs
-        if not validate_date(dob):
-            return "Invalid date format. Please enter in YYYY-MM-DD format."
-        if not validate_mobile_number(mobile_no):
-            return "Invalid mobile number. Please enter a valid mobile number."
-        if not validate_batch_number(batch_no):
-            return "Invalid batch number. Please enter a numeric value."
-
-        # Save data to a file
-        save_patient_data(name, dob, mobile_no, batch_no)
+    # Print full path
+    abs_path = os.path.abspath(DATA_FILE)
+    print(f"✅ Patient data saved successfully in Excel.\n📂 File location: {abs_path}")
 
 if __name__ == "__main__":
     main()
